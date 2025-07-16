@@ -16,7 +16,8 @@ public class OS {
     static JLabel totalExecLabel;
     static JPanel ganttContainer;
     static JSlider timeQuantumSlider;
-    static JLabel timeQuantumValueLabel; // ADDED
+    static JLabel timeQuantumValueLabel;
+    static DefaultTableModel statusModel;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("CPU Scheduling Simulator");
@@ -76,7 +77,6 @@ public class OS {
             ".conf", ".sh", ".col", ".so", ".targets"
         };
 
-        // === Process Status Panel ===
         JPanel statusPanel = new JPanel();
         statusPanel.setLayout(null);
         statusPanel.setBounds(20, 20, 640, 520);
@@ -84,7 +84,7 @@ public class OS {
                 BorderFactory.createEtchedBorder(), "Process Status Table", TitledBorder.CENTER, TitledBorder.TOP));
 
         String[] statusCols = {"Process", "Status", "Completion %", "Remaining Ex.Time", "Waiting Time"};
-        DefaultTableModel statusModel = new DefaultTableModel(statusCols, 0);
+        statusModel = new DefaultTableModel(statusCols, 0);
         JTable statusTable = new JTable(statusModel) {
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -96,7 +96,6 @@ public class OS {
         statusPanel.add(statusScroll);
         frame.add(statusPanel);
 
-        // === Simulation Results Panel ===
         JPanel resultsPanel = new JPanel();
         resultsPanel.setLayout(null);
         resultsPanel.setBounds(670, 20, 230, 150);
@@ -117,7 +116,6 @@ public class OS {
 
         frame.add(resultsPanel);
 
-        // === Quantum Panel ===
         JPanel quantumPanel = new JPanel();
         quantumPanel.setLayout(null);
         quantumPanel.setBounds(670, 180, 230, 100);
@@ -143,7 +141,6 @@ public class OS {
         quantumPanel.add(timeQuantumValueLabel);
         frame.add(quantumPanel);
 
-        // === Gantt Chart Panel ===
         ganttContainer = new JPanel();
         ganttContainer.setLayout(new BoxLayout(ganttContainer, BoxLayout.X_AXIS));
         JScrollPane ganttScroll = new JScrollPane(ganttContainer);
@@ -152,7 +149,6 @@ public class OS {
         ganttScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         frame.add(ganttScroll);
 
-        // === Generate Process ===
         generateBtn.addActionListener(e -> {
             Random rand = new Random();
             String processName = "P" + processCount + extensions[rand.nextInt(extensions.length)];
@@ -171,7 +167,6 @@ public class OS {
             processCount++;
         });
 
-        // === Delete Latest Row ===
         deleteBtn.addActionListener(e -> {
             int rowCount = tableModel.getRowCount();
             if (rowCount > 0) {
@@ -183,22 +178,15 @@ public class OS {
             }
         });
 
-        // === Dropdown Selection ===
         algoDropdown.addActionListener(e -> {
             String selected = algoDropdown.getSelectedItem().toString();
             boolean isRR = selected.equals("Round Robin");
 
-            if (!selected.equals("Select Algorithm")) {
-                selectionMessage.setText("You've selected " + selected);
-            } else {
-                selectionMessage.setText("");
-            }
-
+            selectionMessage.setText(selected.equals("Select Algorithm") ? "" : "You've selected " + selected);
             timeQuantumSlider.setEnabled(isRR);
             timeQuantumValueLabel.setEnabled(isRR);
         });
 
-        // === Run Simulation ===
         runBtn.addActionListener(e -> {
             String selected = algoDropdown.getSelectedItem().toString();
             List<Process> processes = new ArrayList<>();
@@ -216,7 +204,7 @@ public class OS {
             } else if (selected.equals("Round Robin")) {
                 int quantum = timeQuantumSlider.getValue();
                 JOptionPane.showMessageDialog(frame, "Selected Round Robin with Quantum = " + quantum);
-                // runRoundRobin(processes, quantum); // ← Implement this when ready
+                // runRoundRobin(processes, quantum);
             } else {
                 JOptionPane.showMessageDialog(frame, "Please select a valid algorithm.");
             }
@@ -249,17 +237,18 @@ public class OS {
         list.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
         int currentTime = 0, totalTAT = 0, totalWT = 0, totalRT = 0;
-        System.out.println("\n--- FCFS Scheduling Result ---");
-        System.out.println("ID\tName\tAT\tBT\tCT\tTAT\tWT\tRT");
 
-        for (Process p : list) {
+        for (int i = 0; i < list.size(); i++) {
+            Process p = list.get(i);
+
             if (currentTime < p.arrivalTime) currentTime = p.arrivalTime;
+
             p.responseTime = currentTime - p.arrivalTime;
             p.waitingTime = currentTime - p.arrivalTime;
             p.completionTime = currentTime + p.burstTime;
             p.turnaroundTime = p.completionTime - p.arrivalTime;
 
-            for (int i = 0; i < p.burstTime; i++) {
+            for (int j = 0; j < p.burstTime; j++) {
                 JLabel label = new JLabel(p.name);
                 label.setPreferredSize(new Dimension(40, 40));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -267,23 +256,20 @@ public class OS {
                 ganttContainer.add(label);
             }
 
+            statusModel.setValueAt("Completed", i, 1);
+            statusModel.setValueAt("100%", i, 2);
+            statusModel.setValueAt(0, i, 3);
+            statusModel.setValueAt(p.waitingTime, i, 4);
+
             currentTime = p.completionTime;
             totalTAT += p.turnaroundTime;
             totalWT += p.waitingTime;
             totalRT += p.responseTime;
-
-            System.out.printf("%d\t%s\t%d\t%d\t%d\t%d\t%d\t%d\n",
-                    p.id, p.name, p.arrivalTime, p.burstTime,
-                    p.completionTime, p.turnaroundTime,
-                    p.waitingTime, p.responseTime);
         }
 
         int n = list.size();
-        float avgTAT = (float) totalTAT / n;
-        float avgWT = (float) totalWT / n;
-
-        avgTurnaroundLabel.setText("Average Turnaround: " + String.format("%.2f", avgTAT));
-        avgWaitingLabel.setText("Average Waiting: " + String.format("%.2f", avgWT));
+        avgTurnaroundLabel.setText("Average Turnaround: " + String.format("%.2f", (float) totalTAT / n));
+        avgWaitingLabel.setText("Average Waiting: " + String.format("%.2f", (float) totalWT / n));
         totalExecLabel.setText("Total Execution Time: " + currentTime);
 
         ganttContainer.revalidate();
