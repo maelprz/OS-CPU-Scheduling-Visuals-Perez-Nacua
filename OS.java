@@ -1,15 +1,20 @@
 import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
 import java.awt.event.*;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.Random;
+
 
 public class OS {
     static int processCount = 1;
 
     public static void main(String[] args) {
         JFrame frame = new JFrame("CPU Scheduling Simulator");
-        frame.setSize(900, 600);
+        frame.setSize(1200, 650);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setLayout(null);
 
@@ -23,14 +28,14 @@ public class OS {
         processTable.getColumnModel().getColumn(4).setPreferredWidth(80);
 
         JScrollPane scrollPane = new JScrollPane(processTable);
-        scrollPane.setBounds(640, 115, 240, 240);
+        scrollPane.setBounds(920, 90, 250, 240);
         frame.add(scrollPane);
 
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(null);
-        messagePanel.setBounds(640, 10, 240, 40);
+        messagePanel.setBounds(930, 10, 240, 40);
         messagePanel.setBorder(BorderFactory.createTitledBorder(
-            BorderFactory.createEtchedBorder(), "Algorithm Status", TitledBorder.LEFT, TitledBorder.TOP));
+            BorderFactory.createEtchedBorder(), "Algorithm Selected", TitledBorder.LEFT, TitledBorder.TOP));
 
         JLabel selectionMessage = new JLabel("");
         selectionMessage.setBounds(10, 10, 220, 20);
@@ -38,11 +43,11 @@ public class OS {
         frame.add(messagePanel);
 
         JButton generateBtn = new JButton("Generate Random Process");
-        generateBtn.setBounds(688, 60, 150, 30);
+        generateBtn.setBounds(988, 60, 150, 30);
         frame.add(generateBtn);
 
         JButton deleteBtn = new JButton("Delete Latest Random");
-        deleteBtn.setBounds(688, 90, 150, 30);
+        deleteBtn.setBounds(988, 90, 150, 30);
         frame.add(deleteBtn);
 
         String[] algorithms = {
@@ -54,17 +59,38 @@ public class OS {
             "Multilevel Feedback Queue (MLFQ)"
         };
         JComboBox<String> algoDropdown = new JComboBox<>(algorithms);
-        algoDropdown.setBounds(640, 370, 240, 30);
+        algoDropdown.setBounds(940, 370, 240, 30);
         frame.add(algoDropdown);
 
         JButton runBtn = new JButton("Run Simulation");
-        runBtn.setBounds(688, 410, 150, 30);
+        runBtn.setBounds(988, 410, 150, 30);
         frame.add(runBtn);
 
         String[] extensions = {
             ".ino", ".prot", ".npk", ".pem", ".script", ".config",
             ".conf", ".sh", ".col", ".so", ".targets"
         };
+
+        JPanel statusPanel = new JPanel();
+        statusPanel.setLayout(null);
+        statusPanel.setBounds(20, 20, 640, 550); 
+        statusPanel.setBorder(BorderFactory.createTitledBorder(
+            BorderFactory.createEtchedBorder(), "Process Status Table", TitledBorder.LEFT, TitledBorder.TOP));
+
+        String[] statusCols = {"Process", "Status", "Completion %", "Remaining Exec. Time", "Waiting Time"};
+        DefaultTableModel statusModel = new DefaultTableModel(statusCols, 0);
+        JTable statusTable = new JTable(statusModel) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+
+        JScrollPane statusScroll = new JScrollPane(statusTable);
+        statusScroll.setBounds(20, 30, 600, 480); // adjusted to fit inside the panel
+        statusPanel.add(statusScroll);
+        frame.add(statusPanel);
+
 
         generateBtn.addActionListener(e -> {
             Random rand = new Random();
@@ -77,6 +103,10 @@ public class OS {
                 processCount + ".", processName, arrivalTime, execTime, priority
             });
 
+            statusModel.addRow(new Object[]{
+                processName, "Idle", "0%", execTime, 0
+            });
+
             processCount++;
         });
 
@@ -84,6 +114,7 @@ public class OS {
             int rowCount = tableModel.getRowCount();
             if (rowCount > 0) {
                 tableModel.removeRow(rowCount - 1);
+                statusModel.removeRow(rowCount - 1);
                 processCount--;
             } else {
                 JOptionPane.showMessageDialog(frame, "No rows to delete.");
