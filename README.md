@@ -38,7 +38,7 @@ This educational tool aims to enhance the understanding of CPU scheduling behavi
 
 ---
 
-## ollaborators
+## Collaborators
 
 - **Perez, Mel Stephen A.**  
 - **Nacua, Raven Earl C.**
