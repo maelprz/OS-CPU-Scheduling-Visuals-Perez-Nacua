@@ -38,6 +38,25 @@ This educational tool aims to enhance the understanding of CPU scheduling behavi
 
 ---
 
+## Scheduling Algorithms Overview
+
+This simulator implements the following CPU scheduling algorithms:
+
+- First-Come First-Served (FCFS)
+Processes are executed in the order they arrive. It is simple and non-preemptive, making it fair but not always efficient, especially when long processes block shorter ones.
+
+- Shortest Job First (SJF)
+Selects the process with the shortest burst time for execution next. It minimizes average waiting time but is non-preemptive and may cause starvation for longer jobs.
+
+- Shortest Remaining Time First (SRTF)
+A preemptive version of SJF. At every time unit, the process with the smallest remaining execution time is selected. It offers optimal average waiting time but is complex to implement and may lead to starvation.
+
+- Round Robin (RR)
+Each process is given a fixed time quantum in a cyclic order. It is fair and prevents starvation but may have higher turnaround times depending on the chosen quantum.
+
+- Multilevel Feedback Queue (MLFQ)
+Uses multiple queues with different priority levels. Processes can move between queues based on their behavior (e.g., CPU-bound vs I/O-bound). It aims to balance responsiveness and efficiency by dynamically adjusting scheduling decisions.
+
 ## Collaborators
 
 - **Perez, Mel Stephen A.**  
@@ -48,16 +67,16 @@ This educational tool aims to enhance the understanding of CPU scheduling behavi
 
 Project Breakdown
 
-Tasks:
+  Nacua, Raven:
+  Initial GUI
+  SJF
+  SRTF
+  MLFQ
+  Resolved issues in the algorithm to make it fully functional and stable.
 
-    Nacua, Raven:
-    Initial GUI
-    SJF
-    SRTF
-
-    Perez, Mel:
-    FIFO
-    RR
-
-
-(README needs to be elaborated and updated... Will do soon -mel)
+  Perez, Mel:
+  Documentaion
+  FIFO
+  RR
+  Organized and managed the overall file structure to ensure clarity and reduce confusion during development
+  Refactored codebase by separating scheduling algorithms into individual files for modularity and easier maintenance
