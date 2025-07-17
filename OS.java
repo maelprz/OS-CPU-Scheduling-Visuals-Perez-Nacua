@@ -1,4 +1,5 @@
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
@@ -35,7 +36,7 @@ public class OS {
 
         JPanel messagePanel = new JPanel();
         messagePanel.setLayout(null);
-        messagePanel.setBounds(930, 10, 240, 40);
+        messagePanel.setBounds(918, 10, 253, 40);
         messagePanel.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEtchedBorder(), "Algorithm Selected", TitledBorder.CENTER, TitledBorder.TOP));
         JLabel selectionMessage = new JLabel("");
         selectionMessage.setBounds(10, 10, 220, 20);
@@ -50,9 +51,9 @@ public class OS {
         deleteBtn.setBounds(965, 89, 150, 30);
         frame.add(deleteBtn);
 
-        String[] algorithms = {"Select Algorithm", "First In First Out (FIFO)", "Shortest Job First (SJF)", "Shortest Remaining Time First (SRTF)", "Round Robin", "Multilevel Feedback Queue (MLFQ)"};
+        String[] algorithms = {"Select Algorithm", "First In First Out (FIFO)", "Shortest Job First (SJF)", "Shortest Remaining Time First (SRTF)", "Round Robin (RR)", "Multilevel Feedback Queue (MLFQ)"};
         JComboBox<String> algoDropdown = new JComboBox<>(algorithms);
-        algoDropdown.setBounds(926, 370, 240, 30);
+        algoDropdown.setBounds(924, 375, 240, 30);
         frame.add(algoDropdown);
 
         JButton runBtn = new JButton("Run Simulation");
@@ -159,8 +160,10 @@ public class OS {
 
         algoDropdown.addActionListener(e -> {
             String selected = algoDropdown.getSelectedItem().toString();
-            boolean isRR = selected.equals("Round Robin");
-            selectionMessage.setText(selected.equals("Select Algorithm") ? "" : "You've selected " + selected);
+            boolean isRR = selected.equals("Round Robin (RR)");
+            selectionMessage.setHorizontalAlignment(SwingConstants.CENTER);
+            selectionMessage.setBorder(new EmptyBorder(5, 0, 0, 0));
+            selectionMessage.setText(selected.equals("Select Algorithm") ? "" : selected);
             timeQuantumSlider.setEnabled(isRR);
             timeQuantumValueLabel.setEnabled(isRR);
         });
@@ -188,9 +191,9 @@ public class OS {
                     selectionMessage.setText("Running: SHORTEST REMAINING TIME FIRST (SRTF)");
                     SRTF.run(processes, ganttContainer, statusModel, speedSlider, avgTurnaroundLabel, avgWaitingLabel, totalExecLabel);
                     break;
-                case "Round Robin":
+                case "Round Robin (RR)":
                     int quantum = timeQuantumSlider.getValue();
-                    selectionMessage.setText("Running: ROUND ROBIN (Quantum: " + quantum + ")");
+                    selectionMessage.setText("Running: ROUND ROBIN (RR) (Quantum: " + quantum + ")");
                     RR.run(processes, quantum, ganttContainer, statusModel, speedSlider, avgTurnaroundLabel, avgWaitingLabel, totalExecLabel);
                     break;
                 case "Multilevel Feedback Queue (MLFQ)":

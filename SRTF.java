@@ -1,10 +1,20 @@
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Random;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Color;
-import java.awt.Dimension;
+import java.awt.*;
 
 public class SRTF {
+    private static final Map<String, Color> processColors = new HashMap<>();
+    private static final Random rand = new Random();
+
+    private static Color getColorForProcess(String name) {
+        return processColors.computeIfAbsent(name, _ ->
+                new Color(rand.nextInt(128) + 64, rand.nextInt(128) + 64, rand.nextInt(128) + 64));
+    }
+
     public static void run(List<Process> processes, JPanel ganttContainer, DefaultTableModel statusModel,
                            JSlider speedSlider, JLabel avgTurnaroundLabel, JLabel avgWaitingLabel, JLabel totalExecLabel) {
 
@@ -22,7 +32,6 @@ public class SRTF {
                 int minRemaining = Integer.MAX_VALUE;
                 int idx = -1;
 
-                // Find the process with the shortest remaining time at this moment
                 for (int i = 0; i < n; i++) {
                     Process p = processes.get(i);
                     if (p.arrivalTime <= time && !isCompleted[i] && p.remainingTime < minRemaining && p.remainingTime > 0) {
@@ -31,7 +40,6 @@ public class SRTF {
                     }
                 }
 
-                // If no process is ready, advance time
                 if (idx == -1) {
                     time++;
                     continue;
@@ -44,10 +52,11 @@ public class SRTF {
                     current.responseTime = time - current.arrivalTime;
                 }
 
-                // Update Gantt chart
                 JLabel label = new JLabel(current.name);
                 label.setPreferredSize(new Dimension(40, 40));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
+                label.setOpaque(true);
+                label.setBackground(getColorForProcess(current.name));
                 label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
                 SwingUtilities.invokeLater(() -> {
                     ganttContainer.add(label);
@@ -55,7 +64,6 @@ public class SRTF {
                     ganttContainer.repaint();
                 });
 
-                // Simulate 1 unit of CPU time
                 current.remainingTime--;
                 int progress = (int)(((double)(current.burstTime - current.remainingTime) / current.burstTime) * 100);
                 final int row = idx;
@@ -66,7 +74,6 @@ public class SRTF {
                     statusModel.setValueAt(current.remainingTime, row, 3);
                 });
 
-                // Sleep to simulate speed slider
                 try {
                     double speed = speedSlider.getValue() / 10.0;
                     Thread.sleep((long)(500 / speed));
@@ -74,7 +81,6 @@ public class SRTF {
                     e.printStackTrace();
                 }
 
-                // If process is finished
                 if (current.remainingTime == 0) {
                     current.completionTime = time + 1;
                     current.turnaroundTime = current.completionTime - current.arrivalTime;
@@ -92,7 +98,7 @@ public class SRTF {
                     });
                 }
 
-                time++; // Move time forward by 1 unit
+                time++;
             }
 
             final float avgTAT = (float) totalTAT / n;

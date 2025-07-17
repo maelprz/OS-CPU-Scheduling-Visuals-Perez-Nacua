@@ -49,6 +49,11 @@ public class RR {
                     label.setPreferredSize(new Dimension(40, 40));
                     label.setHorizontalAlignment(SwingConstants.CENTER);
                     label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                    
+                    // Color logic
+                    Color color = new Color((current.name.hashCode() * 997) | 0xFF000000);
+                    label.setOpaque(true);
+                    label.setBackground(color);
 
                     SwingUtilities.invokeLater(() -> {
                         ganttContainer.add(label);

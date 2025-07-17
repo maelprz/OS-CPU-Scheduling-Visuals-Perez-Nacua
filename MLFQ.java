@@ -2,8 +2,6 @@ import java.awt.Dimension;
 import java.awt.Color;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.List; 
-
 import java.util.*;
 
 public class MLFQ {
@@ -59,10 +57,17 @@ public class MLFQ {
                 for (int j = 0; j < runTime && current.remainingTime > 0; j++) {
                     current.remainingTime--;
 
-                    final JLabel label = new JLabel(current.name);
+                    final JLabel label = new JLabel(current.name, SwingConstants.CENTER);
                     label.setPreferredSize(new Dimension(40, 40));
-                    label.setHorizontalAlignment(SwingConstants.CENTER);
+                    label.setOpaque(true);
                     label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                    // Generate a unique, consistent color based on process name
+                    int hash = Math.abs(current.name.hashCode());
+                    Color color = new Color((hash & 0xFF0000) >> 16, (hash & 0x00FF00) >> 8, hash & 0x0000FF);
+                    label.setBackground(color);
+                    label.setForeground(Color.WHITE);  // Optional: Better contrast
+
                     SwingUtilities.invokeLater(() -> {
                         ganttContainer.add(label);
                         ganttContainer.revalidate();
@@ -74,7 +79,7 @@ public class MLFQ {
                     final int remaining = current.remainingTime;
 
                     SwingUtilities.invokeLater(() -> {
-                        statusModel.setValueAt("Running (Q" + (levelFinal+1) + ")", idx, 1);
+                        statusModel.setValueAt("Running (Q" + levelFinal + ")", idx, 1);
                         statusModel.setValueAt(progressFinal + "%", idx, 2);
                         statusModel.setValueAt(remaining, idx, 3);
                     });

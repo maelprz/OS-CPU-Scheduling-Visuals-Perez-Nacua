@@ -2,8 +2,19 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.util.List;
+import java.util.Random;
+import java.util.HashMap;
 
 public class SJF {
+
+    private static final HashMap<String, Color> processColors = new HashMap<>();
+    private static final Random rand = new Random();
+
+    private static Color getColorForProcess(String name) {
+        return processColors.computeIfAbsent(name, _ ->
+            new Color(rand.nextInt(200), rand.nextInt(200), rand.nextInt(200))
+        );
+    }
 
     public static void run(List<Process> processList, JPanel ganttPanel, DefaultTableModel tableModel,
                            JSlider speedSlider, JLabel avgTATLabel, JLabel avgWTLabel, JLabel totalTimeLabel) {
@@ -53,6 +64,8 @@ public class SJF {
                     JLabel box = new JLabel(name);
                     box.setPreferredSize(new Dimension(40, 40));
                     box.setHorizontalAlignment(SwingConstants.CENTER);
+                    box.setOpaque(true);
+                    box.setBackground(getColorForProcess(name));
                     box.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 
                     SwingUtilities.invokeLater(() -> {

@@ -1,9 +1,21 @@
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.util.Comparator;
+import java.util.*;
+import java.awt.*;
 
 public class FCFS {
+    private static final Color[] COLORS = {
+        new Color(135, 206, 250),  // Light Sky Blue
+        new Color(255, 160, 122),  // Light Salmon
+        new Color(144, 238, 144),  // Light Green
+        new Color(221, 160, 221),  // Plum
+        new Color(255, 228, 181),  // Moccasin
+        new Color(255, 182, 193),  // Light Pink
+        new Color(240, 230, 140),  // Khaki
+        new Color(175, 238, 238),  // Pale Turquoise
+    };
+
     public static void run(List<Process> processes, JPanel ganttContainer, DefaultTableModel statusModel,
                            JSlider speedSlider, JLabel avgTurnaroundLabel, JLabel avgWaitingLabel, JLabel totalExecLabel) {
 
@@ -14,7 +26,7 @@ public class FCFS {
         processes.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
         new Thread(() -> {
-            final int[] currentTime = {0}; // Wrapped in array for mutability in lambdas
+            final int[] currentTime = {0};
             int totalTAT = 0;
             int totalWT = 0;
 
@@ -30,15 +42,19 @@ public class FCFS {
                 p.completionTime = p.startTime + p.burstTime;
                 p.turnaroundTime = p.completionTime - p.arrivalTime;
 
+                Color color = COLORS[i % COLORS.length];
+
                 for (int j = 1; j <= p.burstTime; j++) {
                     try {
                         int progress = (int) (((double) j / p.burstTime) * 100);
                         int remaining = p.burstTime - j;
 
                         JLabel label = new JLabel(p.name);
-                        label.setPreferredSize(new java.awt.Dimension(40, 40));
+                        label.setPreferredSize(new Dimension(40, 40));
                         label.setHorizontalAlignment(SwingConstants.CENTER);
-                        label.setBorder(BorderFactory.createLineBorder(java.awt.Color.BLACK));
+                        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+                        label.setOpaque(true);
+                        label.setBackground(color);
 
                         SwingUtilities.invokeAndWait(() -> ganttContainer.add(label));
 
