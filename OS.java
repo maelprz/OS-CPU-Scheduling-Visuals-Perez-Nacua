@@ -58,7 +58,11 @@ public class OS {
         JButton runBtn = new JButton("Run Simulation");
         runBtn.setBounds(978, 440, 150, 30);
         frame.add(runBtn);
-        
+
+        JButton resetBtn = new JButton("Reset");
+        resetBtn.setBounds(978, 480, 150, 30);
+        frame.add(resetBtn);
+
         String[] extensions = {".ino", ".prot", ".npk", ".pem", ".script", ".config", ".conf", ".sh", ".col", ".so", ".targets"};
 
         JPanel statusPanel = new JPanel();
@@ -163,7 +167,6 @@ public class OS {
 
         runBtn.addActionListener(e -> {
             String selected = algoDropdown.getSelectedItem().toString();
-
             List<Process> processes = new ArrayList<>();
             for (int i = 0; i < tableModel.getRowCount(); i++) {
                 String name = tableModel.getValueAt(i, 1).toString();
@@ -172,7 +175,6 @@ public class OS {
                 int priority = Integer.parseInt(tableModel.getValueAt(i, 4).toString());
                 processes.add(new Process(i + 1, name, arrival, burst, priority));
             }
-
             switch (selected) {
                 case "First In First Out (FIFO)":
                     selectionMessage.setText("Running: FIRST IN FIRST OUT (FIFO)");
@@ -191,9 +193,33 @@ public class OS {
                     selectionMessage.setText("Running: ROUND ROBIN (Quantum: " + quantum + ")");
                     RR.run(processes, quantum, ganttContainer, statusModel, speedSlider, avgTurnaroundLabel, avgWaitingLabel, totalExecLabel);
                     break;
+                case "Multilevel Feedback Queue (MLFQ)":
+                    selectionMessage.setText("Running: MULTILEVEL FEEDBACK QUEUE (MLFQ)");
+                    MLFQ.run(processes, ganttContainer, statusModel, speedSlider, avgTurnaroundLabel, avgWaitingLabel, totalExecLabel);
+                    break;
                 default:
                     JOptionPane.showMessageDialog(frame, "Please select a valid algorithm.");
-        }});
+            }
+        });
+
+        resetBtn.addActionListener(e -> {
+            tableModel.setRowCount(0);
+            statusModel.setRowCount(0);
+            ganttContainer.removeAll();
+            ganttContainer.revalidate();
+            ganttContainer.repaint();
+            processCount = 1;
+            avgTurnaroundLabel.setText("Average Turnaround: ");
+            avgWaitingLabel.setText("Average Waiting: ");
+            totalExecLabel.setText("Total Execution Time: ");
+            selectionMessage.setText("");
+            algoDropdown.setSelectedIndex(0);
+            timeQuantumSlider.setValue(5);
+            speedSlider.setValue(10);
+            timeQuantumSlider.setEnabled(false);
+            timeQuantumValueLabel.setEnabled(false);
+        });
+
         frame.setVisible(true);
     }
 }

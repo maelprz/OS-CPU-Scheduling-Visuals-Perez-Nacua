@@ -9,13 +9,20 @@ public class SRTF {
                            JSlider speedSlider, JLabel avgTurnaroundLabel, JLabel avgWaitingLabel, JLabel totalExecLabel) {
 
         ganttContainer.removeAll();
+
         new Thread(() -> {
-            int time = 0, completed = 0, n = processes.size();
-            int totalTAT = 0, totalWT = 0;
+            int time = 0;
+            int completed = 0;
+            int n = processes.size();
+            int totalTAT = 0;
+            int totalWT = 0;
             boolean[] isCompleted = new boolean[n];
 
             while (completed < n) {
-                int minRemaining = Integer.MAX_VALUE, idx = -1;
+                int minRemaining = Integer.MAX_VALUE;
+                int idx = -1;
+
+                // Find the process with the shortest remaining time at this moment
                 for (int i = 0; i < n; i++) {
                     Process p = processes.get(i);
                     if (p.arrivalTime <= time && !isCompleted[i] && p.remainingTime < minRemaining && p.remainingTime > 0) {
@@ -24,16 +31,20 @@ public class SRTF {
                     }
                 }
 
+                // If no process is ready, advance time
                 if (idx == -1) {
                     time++;
                     continue;
                 }
 
                 Process current = processes.get(idx);
+
                 if (current.remainingTime == current.burstTime) {
+                    current.startTime = time;
                     current.responseTime = time - current.arrivalTime;
                 }
 
+                // Update Gantt chart
                 JLabel label = new JLabel(current.name);
                 label.setPreferredSize(new Dimension(40, 40));
                 label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -44,17 +55,18 @@ public class SRTF {
                     ganttContainer.repaint();
                 });
 
+                // Simulate 1 unit of CPU time
                 current.remainingTime--;
                 int progress = (int)(((double)(current.burstTime - current.remainingTime) / current.burstTime) * 100);
-                int remaining = current.remainingTime;
                 final int row = idx;
 
                 SwingUtilities.invokeLater(() -> {
                     statusModel.setValueAt("Running", row, 1);
                     statusModel.setValueAt(progress + "%", row, 2);
-                    statusModel.setValueAt(remaining, row, 3);
+                    statusModel.setValueAt(current.remainingTime, row, 3);
                 });
 
+                // Sleep to simulate speed slider
                 try {
                     double speed = speedSlider.getValue() / 10.0;
                     Thread.sleep((long)(500 / speed));
@@ -62,6 +74,7 @@ public class SRTF {
                     e.printStackTrace();
                 }
 
+                // If process is finished
                 if (current.remainingTime == 0) {
                     current.completionTime = time + 1;
                     current.turnaroundTime = current.completionTime - current.arrivalTime;
@@ -79,7 +92,7 @@ public class SRTF {
                     });
                 }
 
-                time++;
+                time++; // Move time forward by 1 unit
             }
 
             final float avgTAT = (float) totalTAT / n;

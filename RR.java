@@ -19,6 +19,7 @@ public class RR {
             boolean[] isInQueue = new boolean[n];
 
             while (completed < n) {
+                // Add processes that have arrived to the ready queue
                 for (int i = 0; i < n; i++) {
                     Process p = processes.get(i);
                     if (!isInQueue[i] && p.arrivalTime <= time) {
@@ -35,8 +36,9 @@ public class RR {
                 Process current = readyQueue.poll();
                 int idx = processes.indexOf(current);
 
-                if (current.burstTime == current.remainingTime)
+                if (current.burstTime == current.remainingTime) {
                     current.responseTime = time - current.arrivalTime;
+                }
 
                 int runTime = Math.min(quantum, current.remainingTime);
 
@@ -47,6 +49,7 @@ public class RR {
                     label.setPreferredSize(new Dimension(40, 40));
                     label.setHorizontalAlignment(SwingConstants.CENTER);
                     label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
                     SwingUtilities.invokeLater(() -> {
                         ganttContainer.add(label);
                         ganttContainer.revalidate();
@@ -66,12 +69,13 @@ public class RR {
                     try {
                         double speed = speedSlider.getValue() / 10.0;
                         Thread.sleep((long)(500 / speed));
-                    } catch (Exception e) {
+                    } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
 
                     time++;
 
+                    // Check if new processes arrived during execution
                     for (int i = 0; i < n; i++) {
                         Process p = processes.get(i);
                         if (!isInQueue[i] && p.arrivalTime <= time) {
@@ -96,7 +100,7 @@ public class RR {
                         statusModel.setValueAt(current.waitingTime, idx, 4);
                     });
                 } else {
-                    readyQueue.add(current); // Requeue the unfinished process
+                    readyQueue.add(current); // Requeue unfinished process
                 }
             }
 

@@ -1,31 +1,34 @@
-import java.util.List;
+import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import java.awt.Color;
-import java.awt.Dimension;
-
+import java.util.List;
 
 public class SJF {
-    public static void run(List<Process> processes, JPanel ganttContainer, DefaultTableModel statusModel,
-                           JSlider speedSlider, JLabel avgTurnaroundLabel, JLabel avgWaitingLabel, JLabel totalExecLabel) {
 
-        ganttContainer.removeAll();
+    public static void run(List<Process> processList, JPanel ganttPanel, DefaultTableModel tableModel,
+                           JSlider speedSlider, JLabel avgTATLabel, JLabel avgWTLabel, JLabel totalTimeLabel) {
+        ganttPanel.removeAll();
+
         new Thread(() -> {
-            int currentTime = 0, completed = 0, n = processes.size();
-            int totalTAT = 0, totalWT = 0;
-            boolean[] done = new boolean[n];
+            int currentTime = 0;
+            int completed = 0;
+            int totalTAT = 0;
+            int totalWT = 0;
+            int n = processList.size();
+            boolean[] isCompleted = new boolean[n];
 
             while (completed < n) {
                 Process shortest = null;
-                int minBurst = Integer.MAX_VALUE;
-                int idx = -1;
+                int index = -1;
 
                 for (int i = 0; i < n; i++) {
-                    Process p = processes.get(i);
-                    if (!done[i] && p.arrivalTime <= currentTime && p.burstTime < minBurst) {
-                        shortest = p;
-                        minBurst = p.burstTime;
-                        idx = i;
+                    Process p = processList.get(i);
+                    if (!isCompleted[i] && p.arrivalTime <= currentTime) {
+                        if (shortest == null || p.burstTime < shortest.burstTime ||
+                            (p.burstTime == shortest.burstTime && p.arrivalTime < shortest.arrivalTime)) {
+                            shortest = p;
+                            index = i;
+                        }
                     }
                 }
 
@@ -34,58 +37,66 @@ public class SJF {
                     continue;
                 }
 
-                shortest.waitingTime = currentTime - shortest.arrivalTime;
-                shortest.responseTime = shortest.waitingTime;
+                shortest.startTime = currentTime;
                 shortest.completionTime = currentTime + shortest.burstTime;
                 shortest.turnaroundTime = shortest.completionTime - shortest.arrivalTime;
+                shortest.waitingTime = shortest.turnaroundTime - shortest.burstTime;
+                shortest.responseTime = shortest.startTime - shortest.arrivalTime;
 
-                for (int j = 0; j < shortest.burstTime; j++) {
+                // Simulate Gantt chart
+                for (int t = 0; t < shortest.burstTime; t++) {
+                    int progress = (int) ((t + 1) * 100.0 / shortest.burstTime);
+                    int remaining = shortest.burstTime - (t + 1);
+                    int rowIndex = index;
+                    String name = shortest.name;
+
+                    JLabel box = new JLabel(name);
+                    box.setPreferredSize(new Dimension(40, 40));
+                    box.setHorizontalAlignment(SwingConstants.CENTER);
+                    box.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+                    SwingUtilities.invokeLater(() -> {
+                        ganttPanel.add(box);
+                        ganttPanel.revalidate();
+                        ganttPanel.repaint();
+                        tableModel.setValueAt("Running", rowIndex, 1);
+                        tableModel.setValueAt(progress + "%", rowIndex, 2);
+                        tableModel.setValueAt(remaining, rowIndex, 3);
+                    });
+
                     try {
-                        int elapsed = j + 1;
-                        int progress = (int)(((double)elapsed / shortest.burstTime) * 100);
-                        int remaining = shortest.burstTime - elapsed;
-                        JLabel label = new JLabel(shortest.name);
-                        label.setPreferredSize(new Dimension(40, 40));
-                        label.setHorizontalAlignment(SwingConstants.CENTER);
-                        label.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-                        SwingUtilities.invokeAndWait(() -> ganttContainer.add(label));
-                        final int row = idx;
-                        final int finalProgress = progress;
-                        final int finalRemaining = remaining;
-                        SwingUtilities.invokeLater(() -> {
-                            statusModel.setValueAt("Running", row, 1);
-                            statusModel.setValueAt(finalProgress + "%", row, 2);
-                            statusModel.setValueAt(finalRemaining, row, 3);
-                            ganttContainer.revalidate();
-                            ganttContainer.repaint();
-                        });
-                        double speed = speedSlider.getValue() / 10.0;
-                        Thread.sleep((long)(500 / speed));
-                    } catch (Exception e) { e.printStackTrace(); }
+                        double simSpeed = speedSlider.getValue() / 10.0;
+                        Thread.sleep((long) (500 / simSpeed));
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
 
-                final int row = idx;
+                // Finalize process display
+                int rowIndexFinal = index;
+                Process finalProcess = shortest;
                 SwingUtilities.invokeLater(() -> {
-                    statusModel.setValueAt("Completed", row, 1);
-                    statusModel.setValueAt("100%", row, 2);
-                    statusModel.setValueAt(0, row, 3);
-                    statusModel.setValueAt(processes.get(row).waitingTime, row, 4);
+                    tableModel.setValueAt("Completed", rowIndexFinal, 1);
+                    tableModel.setValueAt("100%", rowIndexFinal, 2);
+                    tableModel.setValueAt(0, rowIndexFinal, 3);
+                    tableModel.setValueAt(finalProcess.waitingTime, rowIndexFinal, 4);
                 });
 
                 currentTime = shortest.completionTime;
                 totalTAT += shortest.turnaroundTime;
                 totalWT += shortest.waitingTime;
-                done[idx] = true;
+                isCompleted[index] = true;
                 completed++;
             }
 
-            final float avgTAT = (float) totalTAT / n;
-            final float avgWT = (float) totalWT / n;
-            final int finalExecTime = currentTime;
+            float avgTAT = (float) totalTAT / n;
+            float avgWT = (float) totalWT / n;
+            int totalExecution = currentTime;
+
             SwingUtilities.invokeLater(() -> {
-                avgTurnaroundLabel.setText("Average Turnaround: " + String.format("%.2f", avgTAT));
-                avgWaitingLabel.setText("Average Waiting: " + String.format("%.2f", avgWT));
-                totalExecLabel.setText("Total Execution Time: " + finalExecTime);
+                avgTATLabel.setText("Average Turnaround: " + String.format("%.2f", avgTAT));
+                avgWTLabel.setText("Average Waiting: " + String.format("%.2f", avgWT));
+                totalTimeLabel.setText("Total Execution Time: " + totalExecution);
             });
         }).start();
     }

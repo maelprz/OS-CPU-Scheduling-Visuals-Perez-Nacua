@@ -8,28 +8,32 @@ public class FCFS {
                            JSlider speedSlider, JLabel avgTurnaroundLabel, JLabel avgWaitingLabel, JLabel totalExecLabel) {
 
         ganttContainer.removeAll();
+        ganttContainer.revalidate();
+        ganttContainer.repaint();
+
         processes.sort(Comparator.comparingInt(p -> p.arrivalTime));
 
         new Thread(() -> {
-            int currentTime = 0, totalTAT = 0, totalWT = 0;
+            final int[] currentTime = {0}; // Wrapped in array for mutability in lambdas
+            int totalTAT = 0;
+            int totalWT = 0;
 
             for (int i = 0; i < processes.size(); i++) {
                 Process p = processes.get(i);
 
-                if (currentTime < p.arrivalTime) {
-                    currentTime = p.arrivalTime;
+                if (currentTime[0] < p.arrivalTime) {
+                    currentTime[0] = p.arrivalTime;
                 }
 
-                p.responseTime = currentTime - p.arrivalTime;
-                p.waitingTime = currentTime - p.arrivalTime;
-                p.completionTime = currentTime + p.burstTime;
+                p.startTime = currentTime[0];
+                p.waitingTime = p.startTime - p.arrivalTime;
+                p.completionTime = p.startTime + p.burstTime;
                 p.turnaroundTime = p.completionTime - p.arrivalTime;
 
-                for (int j = 0; j < p.burstTime; j++) {
+                for (int j = 1; j <= p.burstTime; j++) {
                     try {
-                        int elapsed = j + 1;
-                        int progress = (int)(((double) elapsed / p.burstTime) * 100);
-                        int remaining = p.burstTime - elapsed;
+                        int progress = (int) (((double) j / p.burstTime) * 100);
+                        int remaining = p.burstTime - j;
 
                         JLabel label = new JLabel(p.name);
                         label.setPreferredSize(new java.awt.Dimension(40, 40));
@@ -51,7 +55,9 @@ public class FCFS {
                         });
 
                         double speed = speedSlider.getValue() / 10.0;
-                        Thread.sleep((long)(500 / speed));
+                        Thread.sleep((long) (500 / speed));
+
+                        currentTime[0]++;
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -66,7 +72,6 @@ public class FCFS {
                     statusModel.setValueAt(processes.get(row).waitingTime, row, 4);
                 });
 
-                currentTime = p.completionTime;
                 totalTAT += p.turnaroundTime;
                 totalWT += p.waitingTime;
             }
@@ -74,13 +79,14 @@ public class FCFS {
             int n = processes.size();
             final float finalAvgTAT = (float) totalTAT / n;
             final float finalAvgWT = (float) totalWT / n;
-            final int finalExecTime = currentTime;
+            final int finalExecTime = currentTime[0];
 
             SwingUtilities.invokeLater(() -> {
                 avgTurnaroundLabel.setText("Average Turnaround: " + String.format("%.2f", finalAvgTAT));
                 avgWaitingLabel.setText("Average Waiting: " + String.format("%.2f", finalAvgWT));
                 totalExecLabel.setText("Total Execution Time: " + finalExecTime);
             });
+
         }).start();
     }
 }
