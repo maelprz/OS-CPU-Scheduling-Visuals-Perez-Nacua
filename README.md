@@ -38,6 +38,22 @@ This educational tool aims to enhance the understanding of CPU scheduling behavi
 
 ---
 
+## Instructions: How to Run the Simulation
+
+1. Input the Number of Processes
+ - After launching the program, the simulation GUI will appear. Enter the number of processes you want to simulate in the provided textbox.
+2. Generate the Processes
+ - Click the "Generate Process" button beside the textbox. This will add the specified number of processes to the table.
+3. Select a Scheduling Algorithm
+ - Use the "Select Algorithm" dropdown menu to choose one of the 5 available scheduling algorithms. Your selection will be displayed above under "Algorithm Selected".
+4. Run the Simulation!
+ - Once you’ve selected an algorithm and generated the processes, press the "Run Simulation" button below the dropdown to begin the simulation.
+5. Optional Controls
+ - To clear all processes and reset the simulation, click the "Clear Table" button below the "Run Simulation" button. (DONT PRESS this if you have already STARTED the simulation)
+ - To delete only the most recently added process, click the "Delete Process" button. This removes the last process from the table only.
+
+---
+
 ## Scheduling Algorithms Overview
 
 This simulator implements the following CPU scheduling algorithms:
@@ -57,6 +73,8 @@ This simulator implements the following CPU scheduling algorithms:
 - **Multilevel Feedback Queue (MLFQ)**
   - Uses multiple queues with different priority levels. Processes can move between queues based on their behavior (e.g., CPU-bound vs I/O-bound). It aims to balance responsiveness and efficiency by dynamically adjusting scheduling decisions.
 
+--- 
+
 ## Collaborators
 
 - **Perez, Mel Stephen A.**  
@@ -67,8 +85,12 @@ This simulator implements the following CPU scheduling algorithms:
 
   **Nacua, Raven:**
   - Designed the initial overall GUI layout
+  - Gantt Chart
+  - Simulation Results
+  - Time Quantum
+  - Simulation Speed
   - SJF
-  - SRTF
+  - RR
   - MLFQ
   - Coded and optimized the algorithm logic
   - Debugged and resolved key issues to ensure full functionality and stability
@@ -76,8 +98,9 @@ This simulator implements the following CPU scheduling algorithms:
   **Perez, Mel:**
   - Documentaion
   - Better visualization for the process
+  - Manual input of number of processes
   - FIFO
-  - RR
+  - SJF
   - Organized and managed the overall file structure to ensure clarity and reduce confusion during development
   - Refactored codebase by separating scheduling algorithms into individual files for modularity and easier maintenance
 

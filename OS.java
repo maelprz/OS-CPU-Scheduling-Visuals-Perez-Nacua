@@ -43,11 +43,15 @@ public class OS {
         messagePanel.add(selectionMessage);
         frame.add(messagePanel);
 
-        JButton generateBtn = new JButton("Random Process");
-        generateBtn.setBounds(965, 61, 150, 30);
-        frame.add(generateBtn);
+        JTextField numProcessField = new JTextField();
+        numProcessField.setBounds(920, 56, 40, 31);
+        frame.add(numProcessField);
 
-        JButton deleteBtn = new JButton("Delete Random");
+        JButton bulkGenerateBtn = new JButton("Generate Process");
+        bulkGenerateBtn.setBounds(965, 56, 150, 30);
+        frame.add(bulkGenerateBtn);
+
+        JButton deleteBtn = new JButton("Delete Process");
         deleteBtn.setBounds(965, 89, 150, 30);
         frame.add(deleteBtn);
 
@@ -60,7 +64,7 @@ public class OS {
         runBtn.setBounds(978, 440, 150, 30);
         frame.add(runBtn);
 
-        JButton resetBtn = new JButton("Reset");
+        JButton resetBtn = new JButton("Clear Table");
         resetBtn.setBounds(978, 480, 150, 30);
         frame.add(resetBtn);
 
@@ -138,15 +142,29 @@ public class OS {
         ganttScroll.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_NEVER);
         frame.add(ganttScroll);
 
-        generateBtn.addActionListener(e -> {
+
+        bulkGenerateBtn.addActionListener(e -> {
+            String input = numProcessField.getText().trim();
+            try {
+            int count = Integer.parseInt(input);
+            if (count <= 0) {
+                JOptionPane.showMessageDialog(frame, "Please enter a number greater than 0.");
+                return;
+            }
+
             Random rand = new Random();
-            String processName = "P" + processCount + extensions[rand.nextInt(extensions.length)];
-            int arrivalTime = rand.nextInt(10);
-            int execTime = rand.nextInt(20) + 1;
-            int priority = rand.nextInt(9) + 1;
-            tableModel.addRow(new Object[]{processCount + ".", processName, arrivalTime, execTime, priority});
-            statusModel.addRow(new Object[]{processName, "Idle", "0%", execTime, 0});
-            processCount++;
+            for (int i = 0; i < count; i++) {
+                String processName = "P" + processCount + extensions[rand.nextInt(extensions.length)];
+                int arrivalTime = rand.nextInt(10);
+                int execTime = rand.nextInt(20) + 1;
+                int priority = rand.nextInt(9) + 1;
+                tableModel.addRow(new Object[]{processCount + ".", processName, arrivalTime, execTime, priority});
+                statusModel.addRow(new Object[]{processName, "Idle", "0%", execTime, 0});
+                processCount++;
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(frame, "Invalid input. Please enter a number.");
+        }
         });
 
         deleteBtn.addActionListener(e -> {
