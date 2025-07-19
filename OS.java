@@ -55,7 +55,7 @@ public class OS {
         deleteBtn.setBounds(965, 89, 150, 30);
         frame.add(deleteBtn);
 
-        String[] algorithms = {"Select Algorithm", "First In First Out (FIFO)", "Shortest Job First (SJF)", "Shortest Remaining Time First (SRTF)", "Round Robin (RR)", "Multilevel Feedback Queue (MLFQ)"};
+        String[] algorithms = {"Select Algorithm", "First Come First Serve (FCFS)", "Shortest Job First (SJF)", "Shortest Remaining Time First (SRTF)", "Round Robin (RR)", "Multilevel Feedback Queue (MLFQ)"};
         JComboBox<String> algoDropdown = new JComboBox<>(algorithms);
         algoDropdown.setBounds(924, 375, 240, 30);
         frame.add(algoDropdown);
@@ -194,11 +194,12 @@ public class OS {
                 int arrival = Integer.parseInt(tableModel.getValueAt(i, 2).toString());
                 int burst = Integer.parseInt(tableModel.getValueAt(i, 3).toString());
                 int priority = Integer.parseInt(tableModel.getValueAt(i, 4).toString());
-                processes.add(new Process(i + 1, name, arrival, burst, priority));
+                processes.add(new Process(i + 1, name, arrival, burst, priority, i));
+
             }
             switch (selected) {
-                case "First In First Out (FIFO)":
-                    selectionMessage.setText("Running: FIRST IN FIRST OUT (FIFO)");
+                case "First Come First Serve (FCFS)":
+                    selectionMessage.setText("Running: FIRST COME FIRST SERVE (FCFS)");
                     FCFS.run(processes, ganttContainer, statusModel, speedSlider, avgTurnaroundLabel, avgWaitingLabel, totalExecLabel);
                     break;
                 case "Shortest Job First (SJF)":

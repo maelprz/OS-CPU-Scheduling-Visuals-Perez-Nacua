@@ -23,8 +23,6 @@ public class FCFS {
         ganttContainer.revalidate();
         ganttContainer.repaint();
 
-        processes.sort(Comparator.comparingInt(p -> p.arrivalTime));
-
         new Thread(() -> {
             final int[] currentTime = {0};
             int totalTAT = 0;
@@ -33,6 +31,7 @@ public class FCFS {
             for (int i = 0; i < processes.size(); i++) {
                 Process p = processes.get(i);
 
+                // Always move time forward if the process arrives later
                 if (currentTime[0] < p.arrivalTime) {
                     currentTime[0] = p.arrivalTime;
                 }
@@ -58,9 +57,9 @@ public class FCFS {
 
                         SwingUtilities.invokeAndWait(() -> ganttContainer.add(label));
 
-                        final int row = i;
                         final int finalProgress = progress;
                         final int finalRemaining = remaining;
+                        final int row = i; // input order = table row
 
                         SwingUtilities.invokeLater(() -> {
                             statusModel.setValueAt("Running", row, 1);
@@ -85,7 +84,7 @@ public class FCFS {
                     statusModel.setValueAt("Completed", row, 1);
                     statusModel.setValueAt("100%", row, 2);
                     statusModel.setValueAt(0, row, 3);
-                    statusModel.setValueAt(processes.get(row).waitingTime, row, 4);
+                    statusModel.setValueAt(p.waitingTime, row, 4);
                 });
 
                 totalTAT += p.turnaroundTime;
