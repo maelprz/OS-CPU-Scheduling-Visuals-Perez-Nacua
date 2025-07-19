@@ -90,7 +90,7 @@ This simulator implements the following CPU scheduling algorithms:
   - Time Quantum
   - Simulation Speed
   - SJF
-  - RR
+  - SRTF
   - MLFQ
   - Coded and optimized the algorithm logic
   - Debugged and resolved key issues to ensure full functionality and stability
@@ -100,7 +100,7 @@ This simulator implements the following CPU scheduling algorithms:
   - Better visualization for the process
   - Manual input of number of processes
   - FIFO
-  - SJF
+  - RR
   - Organized and managed the overall file structure to ensure clarity and reduce confusion during development
   - Refactored codebase by separating scheduling algorithms into individual files for modularity and easier maintenance
 
